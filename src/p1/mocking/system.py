@@ -23,6 +23,12 @@ class Db:
         """
         raise NotImplemented()
 
+    def add_user(self, u: User) -> bool:
+        raise NotImplemented()
+
+    def remove_user(self, id: int) -> bool:
+        raise NotImplemented()
+
 
 class AuthChecker:
     db: Db
@@ -31,7 +37,7 @@ class AuthChecker:
         self.db = db
 
     def is_user(self, id: int):
-        user_ids = [u.id for u in db.all_users()]
+        user_ids = [u.id for u in self.db.all_users()]
         return id in user_ids
 
 
@@ -40,26 +46,68 @@ if __name__ == '__main__':
     db = Db()
     auth = AuthChecker(db)
 
-    # mock-owanie i testowanie
-    # print(db.get_version())
-    # users = db.all_users()
-
-    db.all_users = MagicMock(
-        return_value=[User(2, 'Xi'), User(5, 'Jair')])  # podmieniamy prawdziwą metodę, i piszemy co ma zwrócić
-
-    # db.all_users.side_effect = [[User(2,'Xi')], []]   # todo: multiple values
-
-    print(db.all_users())
     db.all_users = MagicMock(return_value=[])  # podmieniamy prawdziwą metodę, i piszemy co ma zwrócić
+
     print(db.all_users())
-    # print(auth.is_user(11))
 
-    # print(db.all_users.mock_calls)  # z tego można zobaczyć jakie zapytania do metody `all_users` zostały wykonane
-    # db.all_users.assert_called()    # rzuci błędem, jeśli ta metoda nie została uruchomiona
+    # A
+    res = auth.is_user(5)
+    print(res)
+    assert res is False
+    db.all_users.assert_called()
 
-    # users = db.all_users()
-    # print(users)
+    # B
+    db.all_users.return_value = [User(1, "Test"), User(2, "Test")]
+    db.all_users.reset_mock()
 
-    # a = AuthChecker(db)
-    # print(a.is_user(2))
-    # print(a.is_user(3))
+    print(db.all_users())
+
+    res = auth.is_user(2)
+    print(res)
+    assert res is True
+    db.all_users.assert_called()
+
+    # C
+    db.all_users.reset_mock()
+    print(db.all_users())
+
+
+    def add_user(u: User) -> bool:
+        if auth.is_user(u.id):
+            return False
+
+        db.all_users.return_value.append(u)
+        return True
+
+
+    db.add_user = add_user
+
+    for x in [(User(1, "A"), False), (User(5, "A"), True)]:
+        res = db.add_user(x[0])
+        print(res)
+        assert res is x[1]
+        db.all_users.assert_called()
+
+        assert auth.is_user(x[0].id) is True
+
+    # E
+    db.all_users.reset_mock()
+
+
+    def remove_user(id: int) -> bool:
+        if not auth.is_user(id):
+            return False
+
+        for i, x in enumerate(db.all_users()):
+            if x.id == id:
+                db.all_users.return_value.pop(i)
+                return True
+
+
+    db.remove_user = remove_user
+
+    print(db.all_users())
+    db.remove_user(5)
+    assert auth.is_user(5) is False
+    db.all_users.assert_called()
+    print(db.all_users())
