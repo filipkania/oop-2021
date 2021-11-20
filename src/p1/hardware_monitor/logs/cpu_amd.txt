@@ -1,0 +1,18 @@
+k10temp-pci-00cb
+Adapter: PCI adapter
+Tdie:         +39.4°C  (high = +70.0°C)
+Tctl:         +66.4°C
+
+cpu MHz		: 800.003
+cpu MHz		: 800.017
+cpu MHz		: 800.025
+cpu MHz		: 800.031
+cpu MHz		: 800.034
+cpu MHz		: 800.051
+cpu MHz		: 800.058
+cpu MHz		: 800.081
+
+k10temp-pci-00c3
+Adapter: PCI adapter
+Tdie:         +47.5°C  (high = +70.0°C)
+Tctl:         +74.5°C
