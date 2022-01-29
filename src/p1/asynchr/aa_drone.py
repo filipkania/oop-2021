@@ -3,7 +3,7 @@ import threading
 from asyncio import sleep, current_task
 from dataclasses import dataclass
 from datetime import datetime
-from random import random
+from random import randint, random
 
 
 def ts():
@@ -27,6 +27,7 @@ def log(msg):
 class Pos:
     x: float
     y: float
+    z: float
 
 
 async def update_gps(d: Pos):
@@ -41,16 +42,23 @@ async def update_gps(d: Pos):
 async def stabilize_drone(d: Pos):
     log('drone stabilization initiated')
     while True:
-        log(f'stabilizing... at: x={d.x},{d.y}')
+        log(f'stabilizing... at: x={d.x},{d.y},{d.z}')
         await sleep(0.01)
+
+async def get_height(d: Pos):
+    log('starting height checker')
+    while 1:
+        d.z = randint(0, 100)
+        await sleep(0.04)
 
 
 async def main_foo():
     st = ts()
     log(f'start -- na wątku {thread_name()}')
-    d = Pos(0,0)
+    d = Pos(0,0,0)
     asyncio.create_task(update_gps(d))
     asyncio.create_task(stabilize_drone(d))
+    asyncio.create_task(get_height(d))
     log(f'main -- done after {ts() - st:.3f}s')
     await sleep(2)
 
