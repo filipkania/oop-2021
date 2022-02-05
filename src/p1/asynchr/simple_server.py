@@ -1,6 +1,7 @@
 from asyncio import sleep
 
 from aiohttp import web
+from sympy import isprime
 from os import uname
 
 routes = web.RouteTableDef()
@@ -32,6 +33,12 @@ async def hello(request):
     a = float(request.rel_url.query['a'])
     b = float(request.rel_url.query['b'])
     return web.json_response({'result': a + b})
+
+@routes.get('/is_prime')
+async def primeroute(r):
+    a = int(r.rel_url.query['a'])
+
+    return web.json_response({'result': isprime(a)})
 
 
 app = web.Application()
