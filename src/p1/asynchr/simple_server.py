@@ -2,7 +2,6 @@ from asyncio import sleep
 
 from aiohttp import web
 from sympy import isprime
-from os import uname
 
 routes = web.RouteTableDef()
 
@@ -15,14 +14,14 @@ query = req.rel_url.query['query']  # params; required; else .get('query','defau
 
 @routes.get('/')
 async def hello(request):
-    n = uname()
-    print(f'{n.nodename} request received')
-    return web.json_response({'comment': f'hello from {n.nodename}!'})
+    n = 1
+    print(f'{n} request received')
+    return web.json_response({'comment': f'hello from {n}!'})
 
 
 @routes.get('/welcome')
 async def hello(request):
-    name = request.rel_url.query['name']
+    name = request.rel_url.query.get('name', 'none')
     await sleep(1.2)
     print(f'welcome request received for {name}')
     return web.json_response({'comment': f'hello {name}!'})
@@ -30,13 +29,13 @@ async def hello(request):
 
 @routes.get('/add')
 async def hello(request):
-    a = float(request.rel_url.query['a'])
-    b = float(request.rel_url.query['b'])
+    a = float(request.rel_url.query.get('a', 0))
+    b = float(request.rel_url.query.get('b', 0))
     return web.json_response({'result': a + b})
 
 @routes.get('/is_prime')
 async def primeroute(r):
-    a = int(r.rel_url.query['a'])
+    a = int(r.rel_url.query.get('a', 0))
 
     return web.json_response({'result': isprime(a)})
 
