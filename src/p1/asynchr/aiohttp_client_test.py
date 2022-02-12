@@ -1,6 +1,7 @@
 from asyncio import sleep
 from dataclasses import dataclass
-
+import hashlib
+from urllib.parse import quote_plus as encode_uri
 import aiohttp
 import asyncio
 
@@ -29,6 +30,12 @@ async def get_user_details(userid: str) -> User:
             print(User(**d))  # tu tworzymy instancję klasy MyResponse
             return u
 
+async def text_to_md5(txt: str) -> str:
+    return hashlib.md5(txt.encode()).hexdigest()
+
+class UnauthorizedError(Exception):
+    pass
+
 @dataclass
 class WdToken:
     studentid: int
@@ -42,7 +49,15 @@ async def login_user(album: str, password: str) -> WdToken:
     - w przypadku niepoprawnego logwania -- rzucić wyjątkiem UnauthorizedError (napisać taki wyjątek)
     :return:
     """
-    pass
+    async with aiohttp.ClientSession() as session:
+        password = await text_to_md5(password)
+        async with session.get(f'https://wdauth.wsi.edu.pl/authenticate?album={encode_uri(album)}&pass={password}') as resp:
+            d = await resp.json()
+
+            if resp.status == 200:
+                return WdToken(**d.get("token", {}))
+            else:
+                raise UnauthorizedError(d.get("comment", "No message was specified."))
 
 
 async def main():

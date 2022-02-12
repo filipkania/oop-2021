@@ -1,7 +1,7 @@
 from asyncio import sleep
 
 from aiohttp import web
-# from os import uname
+from sympy import isprime
 from p1.asynchr.toolz import is_really_prime
 
 routes = web.RouteTableDef()
@@ -18,7 +18,15 @@ query = req.rel_url.query['query']  # params; required; else .get('query','defau
 
 
 @routes.get('/')
-async def hello1(request):
+async def hello(request):
+    n = 1
+    print(f'{n} request received')
+    return web.json_response({'comment': f'hello from {n}!'})
+
+
+@routes.get('/welcome')
+async def hello(request):
+    name = request.rel_url.query.get('name', 'none')
     n = 'kadabra'
     return web.json_response({'comment': f'hello from n!'})
 
@@ -38,12 +46,23 @@ async def hello2(request):
 
 
 @routes.get('/add')
+async def hello(request):
+    a = float(request.rel_url.query.get('a', 0))
+    b = float(request.rel_url.query.get('b', 0))
+    return web.json_response({'result': a + b})
+
+@routes.get('/is_prime')
+async def primeroute(r):
+    a = int(r.rel_url.query.get('a', 0))
+
+    return web.json_response({'result': isprime(a)})
+
 async def hello3(request):
     a = float(request.rel_url.query['a'])
     b = float(request.rel_url.query['b'])
     return web.json_response({'result': a + b})
 
-@routes.get('/is_prime')
+@routes.get('/is_prime1')
 async def hello4(request):
     x = int(request.rel_url.query['x'])
     res = await is_really_prime(x)
