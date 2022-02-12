@@ -4,8 +4,12 @@ from random import randint
 from aiohttp import web
 from aiohttp.abc import BaseRequest
 from faker import Faker
+from urllib.parse import quote_plus as encode_uri
+from os import path
+import os
 
 routes = web.RouteTableDef()
+STORAGE_DIR = path.abspath(path.join(os.getcwd(), "storage/"))
 
 # pip install aiohttp
 
@@ -40,9 +44,18 @@ async def welcome(request):
     return web.json_response(resp)
 
 
-@routes.get('/serve')
+@routes.get('/serve/{filename}')
 async def serve_file(req):
-    return web.FileResponse('images/bio1.jpg')
+    file_path = req.match_info.get("filename", "")
+    file_path = path.realpath(path.join(STORAGE_DIR, encode_uri(file_path)))
+
+    try:
+        assert path.commonprefix([ file_path, STORAGE_DIR ]) == STORAGE_DIR
+        assert path.exists(file_path)
+
+        return web.FileResponse(file_path)
+    except (FileNotFoundError, AssertionError):
+        return web.json_response(status=404)
 
 @routes.post('/upload')
 async def accept_file(req: BaseRequest):
