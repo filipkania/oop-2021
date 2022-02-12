@@ -14,15 +14,10 @@ query = req.rel_url.query['query']  # params; required; else .get('query','defau
 """
 
 
-async def get_x():
-    return randint(0, 100)
-
-
 @routes.get('/')
 async def hello(request):
     print('request received')
-    x = await get_x()
-    return web.json_response({'comment': f'hello, x={x}!'})
+    return web.json_response({'comment': f'hello, x={12}!'})
 
 
 @routes.get('/welcome')
@@ -44,6 +39,15 @@ async def welcome(request):
     return web.json_response(resp)
 
 
+async def starter():
+    """
+    Starter / app factory, czyli miejsce gdzie można inicjalizować asynchronicze konstrukty.
+    """
+    await sleep(0.2)
+    print('app is starting..')
+    # await database.connect()
+    return app
+
 app = web.Application()
 app.add_routes(routes)
-web.run_app(app, port=8888)  # ewentu
+web.run_app(starter(), port=8888)  # ewentu
