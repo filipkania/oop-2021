@@ -2,6 +2,7 @@ from asyncio import sleep
 from random import randint
 
 from aiohttp import web
+import aiohttp
 from aiohttp.abc import BaseRequest
 from faker import Faker
 from urllib.parse import quote_plus as encode_uri
@@ -65,6 +66,15 @@ async def accept_file(req: BaseRequest):
 
     # field = await reader.next()
     # name = await field.read(decode=True)
+
+    token = req.rel_url.query.get("wdauth", "")
+    if not token:
+        return web.json_response(status=401)
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f'https://wdauth.wsi.edu.pl/user?wdauth={encode_uri(token)}') as resp:
+            if resp.status != 200:
+                return web.json_response(status=resp.status)
 
     field = await reader.next()
     assert field.name == 'file'
