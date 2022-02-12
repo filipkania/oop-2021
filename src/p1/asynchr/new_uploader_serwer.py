@@ -72,7 +72,15 @@ async def accept_file(req: BaseRequest):
     filename = field.filename
     # Cannot rely on Content-Length if transfer is chunked.
     print(f'filename:{filename}')
-    filename = 'images/' + filename
+
+    # Warning: this code doesn't guarantee that filename will be unique.
+    #          if file already exists with this name, existing file will
+    #          get overwritten. we should be using random names instead
+    #          of user specified filename...
+
+    filename = path.realpath(path.join(STORAGE_DIR, encode_uri(filename)))
+    assert path.commonprefix([ filename, STORAGE_DIR ]) == STORAGE_DIR
+
     size = 0
     with open(filename, 'wb') as f:
         file_as_bytes = b''
@@ -86,7 +94,7 @@ async def accept_file(req: BaseRequest):
             # f.write(chunk)
         f.write(file_as_bytes)
 
-    return web.json_response({'name': filename, 'size': size})
+    return web.json_response({'name': field.filename, 'size': size})
 
 
 
