@@ -39,6 +39,16 @@ class OwnershipStore:
             for filename in self.__owners:
                 writer.writerow(dataclasses.asdict(self.__owners[filename]))
 
+    async def save_file(self, filemeta: FileMeta):
+        self.__owners[filemeta.filename] = filemeta
+
+    async def get_meta(self, filename: str) -> FileMeta:
+        return self.__owners.get(filename, None)
+
+    async def can_read(self, filename: str, studentid: int) -> bool:
+        file = self.__owners.get(filename, None)
+        return file != None and (file.groupid == 0 or file.groupid == studentid)
+
 
 async def main():
     # token = await UserService.login_user('kurs01', '...')
