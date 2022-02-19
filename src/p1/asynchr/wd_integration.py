@@ -1,6 +1,6 @@
 import asyncio
 import hashlib
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 
 import aiohttp
 
@@ -10,6 +10,17 @@ class WdToken:
     studentid: int
     wdauth: str
     expiry_epoch_s: int
+
+@dataclass
+class User:
+    studentid: int
+    album: str
+    imie: str
+    nazwisko: str
+
+    def from_dict(d: dict) -> 'User':
+        class_fields = [field.name for field in fields(User)]
+        return User(**{ x: y for x, y in d.items() if x in class_fields})
 
 
 class UnauthorizedError(BaseException):
