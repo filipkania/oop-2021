@@ -70,7 +70,7 @@ class UserService:
                     raise UnknownError
 
 async def main():
-    token = await login_user('kurs01', '...') #f6b22d5e-a9df-4a36-8ae4-f347657faaf6
+    token = await UserService.login_user('kurs01', '...') #f6b22d5e-a9df-4a36-8ae4-f347657faaf6
     print(token)
     print(await UserService.get_user(token.wdauth))
     print(await UserService.get_user(token.wdauth))
