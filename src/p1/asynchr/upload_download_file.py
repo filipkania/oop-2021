@@ -3,6 +3,11 @@ import asyncio
 import aiohttp
 import aiofiles
 
+"""
+Przykładowy kod pozwalający na wysyłanie plików ("upload()", przez POST), i ściąganie plików. 
+
+"""
+
 
 async def download():
     # client download from url
@@ -18,7 +23,7 @@ async def download():
 async def upload():
     # client upload to url
     session = aiohttp.ClientSession()
-    files = {'file': open('bio1.jpg', 'rb')}
+    files = {'file': open('eso1907a.jpg', 'rb')}
     await session.post('http://localhost:8888/upload', data=files)
     await session.close()
 
@@ -27,4 +32,3 @@ async def upload():
 # loop.run_until_complete(download())
 # loop.run_until_complete(upload())
 asyncio.run(upload())
-

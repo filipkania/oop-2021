@@ -1,9 +1,11 @@
+import os.path
 from asyncio import sleep
 from random import randint
 
 from aiohttp import web
 import aiohttp
 from aiohttp.abc import BaseRequest
+from aiohttp.web_middlewares import middleware
 from faker import Faker
 from urllib.parse import quote_plus as encode_uri
 from os import path
@@ -25,25 +27,13 @@ async def hello(request):
     print('request received')
     return web.json_response({'comment': f'hello, x={12}!'})
 
-
-@routes.get('/welcome')
-async def welcome(request):
-    name = request.rel_url.query['name']
-    await sleep(1.2)
-    print(f'welcome request received for {name}')
-    return web.json_response({'comment': f'hello {name}!'})
-
-
-@routes.get('/users/{userid}/details')
-async def welcome(request):
-    # http://0.0.0.0:8888/users/i8811/details
-    userid = request.match_info.get('userid', '')
-    fake = Faker()
-    user_name = fake.name()
-    user_address = fake.address()
-    resp = {'userid': userid, 'name': user_name, 'address': user_address}
-    return web.json_response(resp)
-
+@middleware
+async def middleware(request, handler):
+    # "opakowuje" każdy request... można tu zrobić try... expect...
+    print(f'request: {request}')
+    resp = await handler(request)
+    print(f'response: {resp.status}')
+    return resp
 
 @routes.get('/serve/{filename}')
 async def serve_file(req):
@@ -60,6 +50,9 @@ async def serve_file(req):
 
 @routes.post('/upload')
 async def accept_file(req: BaseRequest):
+    """
+    Funkcja przyjmująca upload pliku.
+    """
     # https://docs.aiohttp.org/en/stable/web_quickstart.html#file-uploads
     print('file upload request hit...')
     reader = await req.multipart()
@@ -118,6 +111,6 @@ async def starter():
     return app
 
 
-app = web.Application()
+app = web.Application(middlewares=[middleware])
 app.add_routes(routes)
 web.run_app(starter(), port=8888)  # ewentu
