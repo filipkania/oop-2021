@@ -58,4 +58,5 @@ async def main():
     store = OwnershipStore()
     await store.init()
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -88,6 +88,8 @@ async def accept_file(req: BaseRequest):
     # Cannot rely on Content-Length if transfer is chunked.
     print(f'filename:{filename}')
 
+    file_meta = FileMeta(filename, user.studentid, user.studentid)
+
     # Warning: this code doesn't guarantee that filename will be unique.
     #          if file already exists with this name, existing file will
     #          get overwritten. we should be using random names instead
@@ -108,6 +110,8 @@ async def accept_file(req: BaseRequest):
             file_as_bytes += chunk
             # f.write(chunk)
         f.write(file_as_bytes)
+
+    await store.save_file(file_meta)
 
     return web.json_response({'name': field.filename, 'size': size})
 
