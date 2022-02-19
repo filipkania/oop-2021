@@ -10,11 +10,14 @@ from faker import Faker
 from urllib.parse import quote_plus as encode_uri
 from os import path
 import os
+from ownership import OwnershipStore, FileMeta
 
 from wd_integration import UserService
 
 routes = web.RouteTableDef()
 STORAGE_DIR = path.abspath(path.join(os.getcwd(), "storage/"))
+
+store = OwnershipStore()
 
 # pip install aiohttp
 
@@ -46,6 +49,10 @@ async def serve_file(req):
         return web.json_response(status=401)
 
     file_path = req.match_info.get("filename", "")
+
+    if not await store.can_read(file_path, user.studentid):
+        return web.json_response(status=403)
+
     file_path = path.realpath(path.join(STORAGE_DIR, encode_uri(file_path)))
 
     try:
@@ -112,10 +119,12 @@ async def starter():
     """
     await sleep(0.2)
     print('app is starting..')
+    await store.init()
     # await database.connect()
     return app
 
 
 app = web.Application(middlewares=[middleware])
 app.add_routes(routes)
+
 web.run_app(starter(), port=8888)  # ewentu

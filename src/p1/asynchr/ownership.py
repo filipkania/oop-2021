@@ -47,7 +47,7 @@ class OwnershipStore:
 
     async def can_read(self, filename: str, studentid: int) -> bool:
         file = self.__owners.get(filename, None)
-        return file != None and (file.groupid == 0 or file.groupid == studentid)
+        return file != None and (file.groupid == 0 or file.groupid == str(studentid))
 
 
 async def main():
