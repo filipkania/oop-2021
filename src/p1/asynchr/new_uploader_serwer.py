@@ -11,6 +11,8 @@ from urllib.parse import quote_plus as encode_uri
 from os import path
 import os
 
+from wd_integration import UserService
+
 routes = web.RouteTableDef()
 STORAGE_DIR = path.abspath(path.join(os.getcwd(), "storage/"))
 
@@ -37,6 +39,12 @@ async def middleware(request, handler):
 
 @routes.get('/serve/{filename}')
 async def serve_file(req):
+    token = req.rel_url.query.get("wdauth", "")
+    try:
+        user = await UserService.get_user(token)
+    except:
+        return web.json_response(status=401)
+
     file_path = req.match_info.get("filename", "")
     file_path = path.realpath(path.join(STORAGE_DIR, encode_uri(file_path)))
 
@@ -61,13 +69,10 @@ async def accept_file(req: BaseRequest):
     # name = await field.read(decode=True)
 
     token = req.rel_url.query.get("wdauth", "")
-    if not token:
+    try:
+        user = await UserService.get_user(token)
+    except:
         return web.json_response(status=401)
-
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f'https://wdauth.wsi.edu.pl/user?wdauth={encode_uri(token)}') as resp:
-            if resp.status != 200:
-                return web.json_response(status=resp.status)
 
     field = await reader.next()
     assert field.name == 'file'
